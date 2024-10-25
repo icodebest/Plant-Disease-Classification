@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potato Disease Classification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: url('green-leaf-texture-leaf-texture-background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        #preview {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border: 2px solid white;
+            border-radius: 10px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Potato Disease Classification</h1>
+        <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+        <img id="preview" src="" alt="Image Preview" style="display: none;">
+        <button onclick="predict()">Predict</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                const preview = document.getElementById('preview');
+                preview.src = reader.result;
+                preview.style.display = 'block'; // Show the preview
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function predict() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://localhost:8000/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `Predicted Class: ${data.class} <br> Confidence: ${data.confidence.toFixed(2)}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = 'An error occurred while making the prediction.';
+            });
+        }
+    </script>
+</body>
+</html>
